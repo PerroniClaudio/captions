@@ -1,0 +1,25 @@
+# Composer
+/vendor/
+/composer.lock
+
+# PHPStorm
+/.idea/
+
+# Laravel specific
+/.env
+/.env.backup
+/storage/
+/bootstrap/cache/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# PHPUnit
+.phpunit.result.cache
+
+# Cache
+/cache/
