@@ -123,7 +123,7 @@ try{
         print_color("Operazione avviata alle ore {$started_at_formatted} : " . $operationName, 'cyan');
 
         do {
-            sleep(30); // Attendi 10 secondi prima di fare il polling
+            sleep(60); 
             $response = $client->get('https://speech.googleapis.com/v2/' . $operationName, [
                 'headers' => [
                     'Content-Type' => 'application/json; charset=utf-8',
@@ -132,14 +132,19 @@ try{
             ]);
             $status = json_decode($response->getBody()->getContents(), true);
 
-            print_color("Stato dell'operazione: " . $status['metadata']['progressPercent'] . "%", 'yellow');
-        } while ($status['metadata']['progressPercent'] !== '100');
+            if(isset($status['metadata']['progressPercent'])) {
+                print_color("Stato dell'operazione: " . $status['metadata']['progressPercent'] . "%", 'yellow');
+            } else {
+                print_color("Stato dell'operazione: Non ancora avviata.", 'yellow');
+            }
+            
+        } while ($status['metadata']['progressPercent'] != '100');
 
         $vtt_file_uri_origin = $status['response']['results'][$audio_uploaded_path]['cloudStorageResult']['vttFormatUri'];
         $ended_at = new DateTime();
         $ended_at_formatted = $ended_at->format('H:i:s');
 
-        print_color("Operazione completata con successo alle ore {ended_at_formatted}", 'cyan');
+        print_color("Operazione completata con successo alle ore {$ended_at_formatted}", 'cyan');
         print_color("Estrazione del testo completata", 'green');
 
     //? 4 - Traduzione del testo estratto in altre lingue usando Google Cloud Translation API
