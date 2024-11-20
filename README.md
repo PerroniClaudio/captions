@@ -1,4 +1,5 @@
-Questo script è una tech demo per la generazione di sottotitoli automatici tramite Google Cloud Text-to-Speech API. È stato creato per labor medical, ma voglio renderlo buono e fruibile in modo da poterlo riutilizzare in futuro.
+Questo script è una tech demo per la generazione di sottotitoli automatici tramite Google Cloud Text-to-Speech API. 
+È stato creato per labor medical, ma voglio renderlo buono e fruibile in modo da poterlo riutilizzare in futuro.
 
 Utilizza la piattaforma Google Cloud Platform per svolgere i seguenti step:
 -  Estrazione dell'audio dal video usando ffmpeg
