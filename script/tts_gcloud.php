@@ -208,7 +208,18 @@ try{
                 $file_name = $row[2];
 
                 $subtitle_destination = "gs://".$config['BUCKET_NAME']."/".$config['BUCKET_PREFIX']."/".$job_id."/{$language_code}_subtitles.vtt";
-                exec("gcloud storage mv $file_name $subtitle_destination");
+
+                $temp_file = tempnam(sys_get_temp_dir(), 'vtt_');
+                exec("gcloud storage cp $file_name $temp_file");
+
+                $output_file = tempnam(sys_get_temp_dir(), 'vtt_output_');
+                addCarriageReturnBeforeNumbers($temp_file, $output_file);
+
+                exec("gcloud storage cp $output_file $subtitle_destination");
+
+                unlink($temp_file);
+                unlink($output_file);
+
             }
 
             $origin_subtitles_file = "gs://".$config['BUCKET_NAME']."/".$config['BUCKET_PREFIX']."/".$job_id."/it_subtitles.vtt";
@@ -243,4 +254,53 @@ function print_color($message, $color) {
     ];
 
     echo "\033[" . $colors[$color] . "m" . $message . "\033[0m\n";
+}
+
+function addCarriageReturnBeforeNumbers($inputFile, $outputFile) {
+    // Leggi il contenuto del file di input
+    $content = file_get_contents($inputFile);
+    
+    // Esplodi il contenuto in righe
+    $lines = explode("\n", $content);
+    
+    // Array per contenere le righe modificate
+    $modifiedLines = [];
+    
+    // Itera attraverso le righe e aggiungi una linea vuota prima di ogni numero intero
+    foreach ($lines as $index => $line) {
+        if ($line === "WEBVTT") {
+            $modifiedLines[] = $line;
+            $modifiedLines[] = ""; // Aggiungi una linea vuota dopo "WEBVTT"
+        } elseif (is_numeric(trim($line)) && ($index == 0 || !is_numeric(trim($lines[$index - 1])))) {
+            $modifiedLines[] = ""; // Aggiungi una linea vuota prima di ogni numero intero
+            $modifiedLines[] = $line;
+        } else {
+            $modifiedLines[] = $line;
+        }
+    }
+
+    // Rimuovi eventuali doppie linee vuote
+    $finalLines = [];
+    $previousLineEmpty = false;
+
+    foreach ($modifiedLines as $line) {
+        if (trim($line) === "") {
+            if (!$previousLineEmpty) {
+                $finalLines[] = $line;
+                $previousLineEmpty = true;
+            }
+        } else {
+            $finalLines[] = $line;
+            $previousLineEmpty = false;
+        }
+    }
+
+    // Sostituisci le righe modificate con quelle finali
+    $modifiedLines = $finalLines;
+    
+    // Unisci le righe modificate in una stringa
+    $modifiedContent = implode("\n", $modifiedLines);
+    
+    // Scrivi il contenuto modificato nel file di output
+    file_put_contents($outputFile, $modifiedContent);
 }
